@@ -1,0 +1,66 @@
+
+server:
+  port: 7654  # Port where your main application runs
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/blitz?createDatabaseIfNotExist=true
+    username: root
+    password: boss
+
+  jpa:
+    database: mysql
+    database-platform: org.hibernate.dialect.MySQLDialect
+    show-sql: true
+    hibernate:
+      ddl-auto: update  # Automatically update schema
+    properties:
+      hibernate:
+        format_sql: true
+
+  task:
+    scheduling:
+      pool:
+        size: 5  # Number of threads in the pool for scheduled tasks
+      shutdown:
+        awaitTermination: true  # Wait for tasks to finish during shutdown
+        awaitTerminationPeriod: 30s  # Timeout to wait for tasks to complete
+
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: DEBUG  # Log SQL queries
+        type:
+          descriptor:
+            sql:
+              BasicBinder: TRACE  # Log SQL parameters
+
+management:
+  endpoints:
+    enabled-by-default: true  # Enable all actuator endpoints by default
+    web:
+      exposure:
+        include: health,info,metrics,prometheus  # Expose selected actuator endpoints
+  server:
+    port: 8081  # Port for actuator endpoints (optional, can be same as the app port)
+
+  endpoint:
+    health:
+      show-details: always  # Show detailed health information for readiness/liveness checks
+      status:
+        http-mapping:
+          UP: 200     # Map 'UP' health status to HTTP 200
+          DOWN: 503   # Map 'DOWN' health status to HTTP 503
+
+  # Enable Prometheus endpoint for metrics scraping
+  web:
+    exposure:
+      include: prometheus  # Ensure Prometheus metrics endpoint is exposed
+  metrics:
+    enabled: true
+
+  # Optional: Customize actuator endpoint security if required
+  # management.endpoints.web.request-handler.enabled: false # Example of disabling request handlers
+  # To secure actuator endpoints, you can add authentication settings using Spring Security
