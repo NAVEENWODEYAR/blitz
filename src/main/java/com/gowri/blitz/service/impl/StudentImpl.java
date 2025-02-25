@@ -13,8 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
-
 @Component
 public class StudentImpl implements StudentService {
 
@@ -31,11 +29,7 @@ public class StudentImpl implements StudentService {
 
     @Override
     public Student findStudent(Integer stId) {
-        Student student = studentRepo.findById(stId).get();
-        if (student !=null) {
-            return student;
-        }
-        throw new RuntimeException("Student not found");
+        return studentRepo.findById(stId).get();
     }
 
     @Override
