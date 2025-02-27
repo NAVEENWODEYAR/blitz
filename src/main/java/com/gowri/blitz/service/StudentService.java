@@ -13,5 +13,6 @@ public interface StudentService {
 
     Student addStudent(Student student);
     Student findStudent(Integer stId);
+    Student editStudent(Integer stId);
     void deleteStudent(Integer stId);
 }
