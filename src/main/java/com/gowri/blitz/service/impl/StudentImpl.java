@@ -29,7 +29,14 @@ public class StudentImpl implements StudentService {
 
     @Override
     public Student findStudent(Integer stId) {
+        log.info("Find by Id:{}",stId);
         return studentRepo.findById(stId).get();
+    }
+
+    @Override
+    public Student editStudent(Integer stId) {
+        log.debug("Modifying student:{}",stId);
+        return null;
     }
 
     @Override
