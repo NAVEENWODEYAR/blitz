@@ -16,7 +16,7 @@ public class DuplicateElements {
         System.out.println("Duplicate elements are:");
 
         for (int i = 0; i < arr.length; i++) {
-            if (!set.add(arr[i])) {  // If add returns false, it means element is already in the set
+            if (!set.add(arr[i])) {
                 System.out.println(arr[i]);
             }
         }
