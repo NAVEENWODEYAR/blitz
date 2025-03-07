@@ -1,0 +1,45 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: springboot-app-deployment
+  labels:
+    app: springboot-app
+spec:
+  replicas: 4  # Number of pods to run
+  selector:
+    matchLabels:
+      app: springboot-app
+  template:
+    metadata:
+      labels:
+        app: springboot-app
+    spec:
+      containers:
+      - name: springboot-app
+        image: your-docker-repo/springboot-app:latest  # Replace with your Docker image
+        ports:
+        - containerPort: 8080  # Default port for Spring Boot app
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "prod"  # Optional: set environment variables for the Spring Boot app
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1024Mi"
+            cpu: "1"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: springboot-app-service
+spec:
+  selector:
+    app: springboot-app
+  ports:
+    - protocol: TCP
+      port: 80  # Port on which the service will be exposed within the cluster
+      targetPort: 8080  # Port on which the Spring Boot app listens
+  type: LoadBalancer  # Optional: Expose via LoadBalancer, or use ClusterIP for internal access
