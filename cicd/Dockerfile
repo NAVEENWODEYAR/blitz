@@ -28,7 +28,7 @@ ENV SERVER_PORT=8080
 EXPOSE $SERVER_PORT
 
 # Add a label with the name of the application
-LABEL name="DairyApp"
+LABEL name="Blitz"
 
 # Run the JAR file, using the environment variable for the server port
 CMD ["java", "-jar", "app.jar", "--server.port=${SERVER_PORT}"]
