@@ -1,4 +1,3 @@
-
 server:
   port: 7654  # Port where your main application runs
 
@@ -27,40 +26,52 @@ spring:
         awaitTermination: true  # Wait for tasks to finish during shutdown
         awaitTerminationPeriod: 30s  # Timeout to wait for tasks to complete
 
-logging:
-  level:
-    org:
-      hibernate:
-        SQL: DEBUG  # Log SQL queries
-        type:
-          descriptor:
-            sql:
-              BasicBinder: TRACE  # Log SQL parameters
+  logging:
+    level:
+      org:
+        hibernate:
+          SQL: DEBUG  # Log SQL queries
+          type:
+            descriptor:
+              sql:
+                BasicBinder: TRACE  # Log SQL parameters
 
-management:
-  endpoints:
-    enabled-by-default: true  # Enable all actuator endpoints by default
+  management:
+    endpoints:
+      enabled-by-default: true  # Enable all actuator endpoints by default
+      web:
+        exposure:
+          include: health,info,metrics,prometheus  # Expose selected actuator endpoints
+    server:
+      port: 8081  # Port for actuator endpoints (optional, can be same as the app port)
+
+    endpoint:
+      health:
+        show-details: always  # Show detailed health information for readiness/liveness checks
+        status:
+          http-mapping:
+            UP: 200     # Map 'UP' health status to HTTP 200
+            DOWN: 503   # Map 'DOWN' health status to HTTP 503
+
+    # Enable Prometheus endpoint for metrics scraping
     web:
       exposure:
-        include: health,info,metrics,prometheus  # Expose selected actuator endpoints
-  server:
-    port: 8081  # Port for actuator endpoints (optional, can be same as the app port)
+        include: prometheus  # Ensure Prometheus metrics endpoint is exposed
+    metrics:
+      enabled: true
 
-  endpoint:
-    health:
-      show-details: always  # Show detailed health information for readiness/liveness checks
-      status:
-        http-mapping:
-          UP: 200     # Map 'UP' health status to HTTP 200
-          DOWN: 503   # Map 'DOWN' health status to HTTP 503
+  # Kafka Configuration
+  kafka:
+    bootstrap-servers: localhost:9092  # Kafka broker(s) address
+    consumer:
+      group-id: my-group  # Consumer group id
+      auto-offset-reset: earliest  # Start consuming from the earliest offset if no offset is found
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    listener:
+      concurrency: 3  # Number of threads for Kafka listener (you can adjust as needed)
+      missing-topics-fatal: false  # Do not fail if Kafka topic is missing
 
-  # Enable Prometheus endpoint for metrics scraping
-  web:
-    exposure:
-      include: prometheus  # Ensure Prometheus metrics endpoint is exposed
-  metrics:
-    enabled: true
-
-  # Optional: Customize actuator endpoint security if required
-  # management.endpoints.web.request-handler.enabled: false # Example of disabling request handlers
-  # To secure actuator endpoints, you can add authentication settings using Spring Security
