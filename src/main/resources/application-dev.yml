@@ -75,3 +75,7 @@ spring:
       concurrency: 3  # Number of threads for Kafka listener (you can adjust as needed)
       missing-topics-fatal: false  # Do not fail if Kafka topic is missing
 
+
+kafka:
+  producer:
+    test: my-topic
