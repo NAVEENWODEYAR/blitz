@@ -1,18 +1,22 @@
 package com.gowri.blitz.service.impl;
 
+import com.gowri.blitz.modal.Student;
+import com.gowri.blitz.repo.StudentRepo;
+import com.gowri.blitz.service.StudentService;
+import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
+import org.springframework.stereotype.Component;
+
+import java.util.Optional;
+
 /*
  * @author NaveenWodeyar
  * @date 24-02-2025
  */
-
-import com.gowri.blitz.modal.Student;
-import com.gowri.blitz.repo.StudentRepo;
-import com.gowri.blitz.service.StudentService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 @Component
 public class StudentImpl implements StudentService {
 
@@ -22,26 +26,60 @@ public class StudentImpl implements StudentService {
     private StudentRepo studentRepo;
 
     @Override
+    @Transactional(rollbackOn = Exception.class)
+    @Retryable(value = {Exception.class}, maxAttempts = 5, backoff = @org.springframework.retry.annotation.Backoff(delay = 2000, multiplier = 2))
     public Student addStudent(Student student) {
-        log.info("Insert into Student:{} ",student);
-        return studentRepo.save(student);
+        try {
+            log.info("Inserting into Student: {}", student);
+            return studentRepo.save(student);
+        } catch (Exception e) {
+            log.error("Error while inserting student: {}. Reason: {}", student, e.getMessage());
+            throw e;  // Rethrow exception to trigger retry
+        }
     }
 
     @Override
+    @Transactional
+    @Retryable(value = {Exception.class}, maxAttempts = 5, backoff = @org.springframework.retry.annotation.Backoff(delay = 2000, multiplier = 2))
     public Student findStudent(Integer stId) {
-        log.info("Find by Id:{}",stId);
-        return studentRepo.findById(stId).get();
+        try {
+            log.info("Fetching student by ID: {}", stId);
+            Optional<Student> student = studentRepo.findById(stId);
+            return student.orElseThrow(() -> new RuntimeException("Student not found with ID: " + stId));
+        } catch (Exception e) {
+            log.error("Error fetching student by ID: {}. Reason: {}", stId, e.getMessage());
+            throw e;  // Rethrow exception to trigger retry
+        }
     }
 
     @Override
+    @Retryable(value = {Exception.class}, maxAttempts = 5, backoff = @org.springframework.retry.annotation.Backoff(delay = 2000, multiplier = 2))
     public Student editStudent(Integer stId) {
-        log.debug("Modifying student:{}",stId);
-        return null;
+        try {
+            log.debug("Modifying student with ID: {}", stId);
+            // Add logic for modifying a student here if needed
+            return null; // Placeholder for actual logic
+        } catch (Exception e) {
+            log.error("Error editing student with ID: {}. Reason: {}", stId, e.getMessage());
+            throw e;
+        }
     }
 
     @Override
+    @Retryable(value = {Exception.class}, maxAttempts = 5, backoff = @org.springframework.retry.annotation.Backoff(delay = 2000, multiplier = 2))
     public void deleteStudent(Integer stId) {
-    log.warn("Removing from student:{} ",stId);
-    studentRepo.deleteById(stId);
+        try {
+            log.warn("Removing student with ID: {}", stId);
+            studentRepo.deleteById(stId);
+        } catch (Exception e) {
+            log.error("Error while deleting student with ID: {}. Reason: {}", stId, e.getMessage());
+            throw e;  // Rethrow exception to trigger retry
+        }
+    }
+
+    // Recovery method that will be invoked after 5 failed retry attempts
+    @Recover
+    public void recover(Exception e, Integer stId) {
+        log.error("Failed after 5 retry attempts to process operation for student with ID: {}. Final exception: {}", stId, e.getMessage());
     }
 }
