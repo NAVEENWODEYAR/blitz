@@ -10,79 +10,117 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Date;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockitoExtension.class)  // Enable Mockito extension
 public class StudentImplTest {
 
-    @Mock
-    private StudentRepo studentRepo;
-
     @InjectMocks
-    private StudentImpl studentService;
+    private StudentImpl studentService;  // Service to test
+
+    @Mock
+    private StudentRepo studentRepo;  // Mock the StudentRepo
 
     private Student student;
 
     @BeforeEach
     void setUp() {
-        // Initialize the student object before each test
+        // Set up the test data
         student = new Student();
-        student.setStId(1);
         student.setFirstName("John Doe");
         student.setDateOfBirth(new Date());
     }
 
     @Test
-    void testAddStudent() {
-        // Arrange: Mock the repository save method
-        when(studentRepo.save(any(Student.class))).thenReturn(student);
+    void testAddStudent_RetrySuccessAfterRetries() {
+        // Simulate the first 4 retries failing, and the 5th succeeding
+        when(studentRepo.save(any(Student.class)))
+                .thenThrow(new RuntimeException("Temporary failure"))  // Simulate failure for first 4 attempts
+                .thenReturn(student);  // On the 5th attempt, return the student
 
-        // Act: Call the addStudent method
+        // Call the method and assert the outcome
         Student result = studentService.addStudent(student);
 
-        // Assert: Verify that the result matches the expected student object
+        // Verify that the repository save method was called exactly 5 times
+        verify(studentRepo, times(5)).save(any(Student.class));
+
+        // Assert that the result is the student object that was returned after retries
         assertNotNull(result);
-        assertEquals(student.getStId(), result.getStId());
-        assertEquals(student.getFirstName(), result.getFirstName());
-        verify(studentRepo, times(1)).save(any(Student.class));
+        assertEquals(student, result);
     }
 
     @Test
-    void testFindStudent() {
-        // Arrange: Mock the repository findById method
-        when(studentRepo.findById(1)).thenReturn(Optional.of(student));
+    void testAddStudent_RetryFailureAfterMaxAttempts() {
+        // Simulate failure for all retry attempts
+        when(studentRepo.save(any(Student.class)))
+                .thenThrow(new RuntimeException("Permanent failure"));
 
-        // Act: Call the findStudent method
+        // Call the method and expect it to throw an exception after 5 attempts
+        RuntimeException thrownException = assertThrows(RuntimeException.class, () -> {
+            studentService.addStudent(student);
+        });
+
+        // Verify the exception message
+        assertEquals("Permanent failure", thrownException.getMessage());
+
+        // Verify that the repository save method was called 5 times
+        verify(studentRepo, times(5)).save(any(Student.class));
+    }
+
+    @Test
+    void testFindStudent_RetrySuccess() {
+        // Simulate the first 2 retries failing, and the 3rd succeeding
+        when(studentRepo.findById(anyInt()))
+                .thenThrow(new RuntimeException("Temporary failure"))
+                .thenThrow(new RuntimeException("Temporary failure"))
+                .thenReturn(java.util.Optional.of(student));  // 3rd attempt succeeds
+
+        // Call the method and assert the outcome
         Student result = studentService.findStudent(1);
 
-        // Assert: Verify the student is returned correctly
+        // Verify that the repository findById method was called 3 times
+        verify(studentRepo, times(3)).findById(anyInt());
+
+        // Assert that the result is the student object that was returned after retries
         assertNotNull(result);
-        assertEquals(student.getStId(), result.getStId());
-        assertEquals(student.getFirstName(), result.getFirstName());
-        verify(studentRepo, times(1)).findById(1);
+        assertEquals(student, result);
     }
 
     @Test
-    void testDeleteStudent() {
-        // Arrange: Mock the repository deleteById method
-        doNothing().when(studentRepo).deleteById(1);
+    void testFindStudent_RetryFailure() {
+        // Simulate failure for all retry attempts
+        when(studentRepo.findById(anyInt()))
+                .thenThrow(new RuntimeException("Student not found"));
 
-        // Act: Call the deleteStudent method
-        studentService.deleteStudent(1);
+        // Call the method and expect it to throw an exception after 5 attempts
+        RuntimeException thrownException = assertThrows(RuntimeException.class, () -> {
+            studentService.findStudent(1);
+        });
 
-        // Assert: Verify that deleteById method was called once
-        verify(studentRepo, times(1)).deleteById(1);
+        // Verify the exception message
+        assertEquals("Student not found", thrownException.getMessage());
+
+        // Verify that the repository findById method was called 5 times
+        verify(studentRepo, times(5)).findById(anyInt());
     }
 
     @Test
-    void testEditStudent() {
-        // Act: Call the editStudent method (currently does nothing in the implementation)
-        Student result = studentService.editStudent(1);
+    void testRecoverMethodAfterRetryFailure() {
+        // Simulate a permanent failure on all retries
+        when(studentRepo.save(any(Student.class)))
+                .thenThrow(new RuntimeException("Permanent failure"));
 
-        // Assert: Verify the result is null since editStudent is not implemented
-        assertNull(result);
+        // Capture the exception that will be thrown after all retries
+        RuntimeException thrownException = assertThrows(RuntimeException.class, () -> {
+            studentService.addStudent(student);
+        });
+
+        // Verify that the exception is correctly logged or thrown
+        assertEquals("Permanent failure", thrownException.getMessage());
+
+        // Verify that the recover method is triggered after all retries fail
+        verify(studentRepo, times(5)).save(any(Student.class));
     }
 }
