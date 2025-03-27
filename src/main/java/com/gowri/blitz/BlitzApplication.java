@@ -11,6 +11,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
+import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.time.LocalDateTime;
@@ -19,6 +20,7 @@ import java.time.format.DateTimeFormatter;
 @SpringBootApplication
 @EnableScheduling
 @EnableCaching
+@EnableRetry
 public class BlitzApplication implements CommandLineRunner {
     private static final Logger log = LoggerFactory.getLogger(BlitzApplication.class);
     @Autowired
