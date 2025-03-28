@@ -1,5 +1,6 @@
 package com.gowri.blitz.service.impl;
 
+import com.gowri.blitz.exceptions.BlitzException;
 import com.gowri.blitz.modal.Student;
 import com.gowri.blitz.repo.StudentRepo;
 import com.gowri.blitz.service.StudentService;
@@ -79,7 +80,11 @@ public class StudentImpl implements StudentService {
 
     // Recovery method that will be invoked after 5 failed retry attempts
     @Recover
-    public void recover(Exception e, Integer stId) {
+    public void recover(Exception e, Integer stId) throws BlitzException {
+        // Log the failure after retries are exhausted
         log.error("Failed after 5 retry attempts to process operation for student with ID: {}. Final exception: {}", stId, e.getMessage());
+
+        // Throw a BlitzException with a custom message, the original exception as the cause, and additional context
+        throw new BlitzException("Unable to process the request after multiple retry attempts", e, 500, "Retry attempts exhausted for student ID: " + stId);
     }
 }
