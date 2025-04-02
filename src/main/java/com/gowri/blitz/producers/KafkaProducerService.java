@@ -25,7 +25,13 @@ public class KafkaProducerService {
     }
 
     public void sendMessage(String message) {
-        log.info("Sending message: {}",message);
-        kafkaTemplate.send(topic, message);  // "my_topic" is the Kafka topic to which we send messages
+
+        try {
+            log.info("Sending message: {}",message);
+            kafkaTemplate.send(topic, message);  // "my_topic" is the Kafka topic to which we send messages
+        } catch (Exception e) {
+            log.error("Exception ouucrred: {}",e.getMessage());
+            throw new RuntimeException(e);
+        }
     }
 }
