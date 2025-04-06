@@ -1,8 +1,6 @@
 package com.gowri.blitz.modal;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 import java.util.Date;
 import java.util.Objects;
@@ -17,6 +15,10 @@ public class Student {
     private String lastName;
     private String email;
     private Date dateOfBirth;
+
+    @ManyToOne
+    @JoinColumn(name = "teacher_id")  // This assumes there's a teacher_id column in the STUDENT table
+    private Teacher teacher;
 
     // Getter and Setter methods
     public Integer getStId() {
