@@ -79,3 +79,6 @@ spring:
 kafka:
   producer:
     test: my-topic
+
+  consumer:
+    test: test-topic
