@@ -1,6 +1,9 @@
 server:
   port: 7654  # Port where your main application runs
 
+  servlet:
+    context-path: /blitz
+
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -82,3 +85,19 @@ kafka:
 
   consumer:
     test: test-topic
+
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: springboot-app
+            client-secret: YOUR_CLIENT_SECRET
+            provider: keycloak
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope: openid, profile, email
+
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:8080/realms/myrealm
