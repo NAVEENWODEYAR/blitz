@@ -28,6 +28,6 @@ public class KafkaController {
     public String sendMessage(@RequestParam String message) {
         log.info("Received message: {}",message);
         producerService.sendMessage(message);
-        return "Message sent to Kafka topic";
+        return "Message sent/published to Kafka topic";
     }
 }
