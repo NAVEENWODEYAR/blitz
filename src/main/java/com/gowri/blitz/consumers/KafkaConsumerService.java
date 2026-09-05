@@ -33,7 +33,7 @@ public class KafkaConsumerService {
             try{
                 studentImpl.addStudent(student);
             }catch (Exception e){
-                log.error("Exception occured while savig student:{}",e.getMessage());
+                log.error("Exception occured while savig student record:{}",e.getMessage());
             }
             System.out.println("Message consumed successfully: " + message);
             log.debug("Student :{}",student);
