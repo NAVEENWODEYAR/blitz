@@ -45,7 +45,7 @@ public class StudentImpl implements StudentService {
     @Retryable(value = {Exception.class}, maxAttempts = 5, backoff = @org.springframework.retry.annotation.Backoff(delay = 2000, multiplier = 2))
     public Student findStudent(Integer stId) {
         try {
-            log.info("Fetching student by ID: {}", stId);
+            log.info("Fetching student record by ID: {}", stId);
             Optional<Student> student = studentRepo.findById(stId);
             return student.orElseThrow(() -> new RuntimeException("Student not found with ID: " + stId));
         } catch (Exception e) {
@@ -61,7 +61,7 @@ public class StudentImpl implements StudentService {
             log.debug("Modifying student with ID: {}", stId);
             return null;
         } catch (Exception e) {
-            log.error("Error editing student with ID: {}. Reason: {}", stId, e.getMessage());
+            log.error("Error editing student record with ID: {}. Reason: {}", stId, e.getMessage());
             throw e;
         }
     }
@@ -73,7 +73,7 @@ public class StudentImpl implements StudentService {
             log.warn("Removing student with ID: {}", stId);
             studentRepo.deleteById(stId);
         } catch (Exception e) {
-            log.error("Error while deleting student with ID: {}. Reason: {}", stId, e.getMessage());
+            log.error("Error while deleting student record with ID: {}. Reason: {}", stId, e.getMessage());
             throw e;  // Rethrow exception to trigger retry
         }
     }
