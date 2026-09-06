@@ -23,7 +23,7 @@ public class RestClient {
     private RestTemplate restTemplate;
 
     public String get(String url, Map<String, String> headers){
-        log.info("Making Put call for: {}, headers :{}",url,headers);
+        log.info("Making rest (Put) call for: {}, headers :{}",url,headers);
         String result="";
 
         return result;
