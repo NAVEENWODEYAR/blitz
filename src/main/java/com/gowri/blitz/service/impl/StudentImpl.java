@@ -32,7 +32,7 @@ public class StudentImpl implements StudentService {
     @Retryable(value = {Exception.class}, maxAttempts = 5, backoff = @org.springframework.retry.annotation.Backoff(delay = 2000, multiplier = 2))
     public Student addStudent(Student student) {
         try {
-            log.info("Inserting into Student: {}", student);
+            log.info("Inserting new record into Student: {}", student);
             return studentRepo.save(student);
         } catch (Exception e) {
             log.error("Error while inserting student: {}. Reason: {}", student, e.getMessage());
