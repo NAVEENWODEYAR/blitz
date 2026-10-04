@@ -31,6 +31,6 @@ public class TestController {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE MMMMuuuu HH:mm");
 
         // Return the formatted date and time as a string
-        return "Current Date & Time: " + now.format(formatter);
+        return "Current DateTime: " + now.format(formatter);
     }
 }
